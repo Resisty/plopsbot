@@ -7,13 +7,15 @@
 #
 #  Creation Date : 18-03-2016
 #
-#  Last Modified : Fri 18 Mar 2016 11:35:24 AM CDT
+#  Last Modified : Mon 21 Mar 2016 12:39:16 PM CDT
 #
 #  Created By : Brian Auron
 #
 # ========================================
 
 import slackbot.bot
+
+CONFIG = 'config.yml'
 
 def main():
     bot = slackbot.bot.Bot()
