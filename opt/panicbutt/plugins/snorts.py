@@ -1,0 +1,187 @@
+#!/usr/bin/python
+# =======================================
+#
+#  File Name : snorts.py
+#
+#  Purpose :
+#
+#  Creation Date : 03-05-2015
+#
+#  Last Modified : Fri 25 Mar 2016 05:29:36 PM CDT
+#
+#  Created By : Brian Auron
+#
+# ========================================
+
+import functools
+import yaml
+import datetime
+import slackbot.bot
+import peewee
+import re
+from playhouse.postgres_ext import PostgresqlExtDatabase
+
+with open('config.yml', 'r') as fptr:
+    cfg = yaml.load(fptr.read())
+dbuser = cfg['dbuser']
+dbpass = cfg['dbpass']
+db = cfg['db']
+psql_db = PostgresqlExtDatabase(db, user=dbuser, password=dbpass)
+
+def user(msg):
+    return msg._client.users[message._get_user_id()]['name']
+
+def users(msg):
+    return [j['name'] for i,j in message._client.users.items()]
+
+class BaseModel(peewee.Model):
+    class Meta:
+        database = psql_db
+
+
+class Snorts(BaseModel):
+    nick = peewee.CharField()
+    day = peewee.DateField()
+    count = peewee.IntegerField(default=0)
+
+
+class Counts(BaseModel):
+    key = peewee.CharField(unique=True)
+    count = peewee.IntegerField(default=0)
+    day = peewee.DateField(null=True)
+
+
+def connect(func):
+  @functools.wraps(func)
+  def wrapper(*args, **kwargs):
+    try:
+      psql_db.connect()
+      return func(*args, **kwargs)
+    finally:
+      psql_db.close()
+  return wrapper
+
+@connect
+def create_tables():
+    psql_db.create_tables([Snorts, Counts])
+
+@connect
+def drop_tables():
+    psql_db.connect()
+    psql_db.drop_tables([Snorts, Counts])
+
+def do_snort(nick):
+    day = datetime.date.today()
+    try:
+        row = Snorts.select().where((Snorts.nick == nick) &
+                                    (Snorts.day == day)).get()
+    except peewee.DoesNotExist as e:
+        row = Snorts.create(nick = nick, day = day)
+    Snorts.update(count = Snorts.count + 1).where(Snorts.id == row.id).execute()
+    row = Snorts.select().where(Snorts.id == row.id).get()
+    return '%s has snorted %s snorts today.' % (row.nick, row.count)
+
+SNORTSTRING = r'''snort\s
+                  ([\w-]+)'''
+SNORT = re.compile(SNORTSTRING, re.IGNORECASE|re.VERBOSE)
+@slackbot.bot.respond_to(SNORT)
+def snort_me(message, *groups):
+    who = groups[0]
+    if who == 'me':
+        who = user(message)
+    nicks = users(message)
+    if who not in nicks:
+        message.reply('Cannot snort %s a snort, nick not in channel.' % who)
+    else:
+        message.reply(do_snort(who))
+    data['reply'] = 'public'
+    return data
+
+SHOWSNORTSTRING = r'''show\ssnorts'''
+SHOWSNORT = re.compile(SHOWSNORTSTRING, re.IGNORECASE|re.VERBOSE)
+@slackbot.bot.respond_to(SHOWSNORT)
+def show_snorts(message):
+    day = datetime.date.today()
+    rows = Snorts.select().where(Snorts.day == day)
+    results = []
+    for row in rows:
+        results.append('%s has snorted %s snorts today.' % (row.nick, row.count))
+    if results == []:
+        results.append('Nobody has snorted a snort today!')
+    message.reply('\n'.join(results))
+
+COUNTINGSTRING = r'''(\w+)
+                     (\+\+|--)$'''
+COUNTING = re.compile(COUNTINGSTRING, re.IGNORECASE|re.VERBOSE)
+@slackbot.bot.listen_to(COUNTING)
+def count_update(message, *groups):
+    key, delta = groups
+    key = key.lower()
+    delta = {'++': 1, '--': -1}[delta]
+    with psql_db.atomic():
+        try:
+            count = Counts.create(key = key, count = 0)
+        except peewee.IntegrityError:
+            psql_db.connect() # not entirely sure why this is necessary but it is
+            count = Counts.get(Counts.key == key)
+        count.count += delta
+        count.save()
+    message.reply('%s is now %s' % (key, count.count))
+
+DELCOUNTSTRING = r'''delete\s
+                     (\w+)$'''
+DELCOUNT = re.compile(DELCOUNTSTRING, re.IGNORECASE|re.VERBOSE)
+@slackbot.bot.respond_to(DELCOUNT)
+def count_delete(message, *groups):
+    key = groups[0]
+    key = key.lower()
+    try:
+        count = Counts.select().where(Counts.key == key, Counts.count == 0).get()
+        count.delete_instance()
+        msg = '%s has been deleted.' % key
+    except peewee.DoesNotExist:
+        msg = '%s does not exist in the Counts table or it does not have a \
+count of 0!' % key
+    message.reply(msg)
+
+GETCOUNTSTRING = r'''print\s
+                     (\w+)$'''
+GETCOUNT = re.compile(GETCOUNTSTRING, re.IGNORECASE|re.VERBOSE)
+@slackbot.bot.respond_to(GETCOUNT)
+def count_get(message, *groups):
+    key = groups[0]
+    key = key.lower()
+    try:
+        message.reply(str(Counts.get(Counts.key == key).count))
+    except peewee.DoesNotExist:
+        message.reply('None')
+
+GETCOUNTS_STRING = r'''list\scounts'''
+GETCOUNTS = re.compile(GETCOUNTS_STRING, re.IGNORECASE|re.VERBOSE)
+@slackbot.bot.respond_to(GETCOUNTS)
+def count_list(message):
+    try:
+        message.reply(', '.join([i.key for i in Counts.select()]))
+    except peewee.DoesNotExist:
+        message.reply('Could not find keys for counts!')
+
+JEFFWROTESTRING = r'''.*'''
+JEFFWROTE = re.compile(JEFFWROTESTRING, re.IGNORECASE|re.VERBOSE)
+@slackbot.bot.listen_to(JEFFWROTE)
+def annoy_jeff(message):
+    if message._get_user_id() != cfg['HUGHLOLRUS_ID']:
+        return
+    psql_db.connect()
+    try:
+        previous = Counts.get(Counts.key == 'DaysWithoutResume').day
+    except:
+        return
+    today = datetime.datetime.now().date()
+    if today > previous:
+        q = (Counts
+             .update(day = today)
+             .where(Counts.key == 'DaysWithoutResume'))
+        q.execute()
+        msg = 'UPDATE YOUR RESUME, SEND IT TO DK, AND GET SOME JOB/LIFE BALANCE/SATISFACTION FFS'
+        message.reply(msg)
+
