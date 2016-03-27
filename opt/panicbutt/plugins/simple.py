@@ -7,7 +7,7 @@
 #
 #  Creation Date : 18-03-2016
 #
-#  Last Modified : Fri 25 Mar 2016 05:51:28 PM CDT
+#  Last Modified : Sat 26 Mar 2016 08:14:02 PM CDT
 #
 #  Created By : Brian Auron
 #
@@ -131,7 +131,7 @@ GREATDAYSTRING = r'''(it's\sgonna\sbe\sa\s)*
                     great\sday'''
 GREATDAY = re.compile(GREATDAYSTRING, re.IGNORECASE|re.VERBOSE)
 @slackbot.bot.listen_to(GREATDAY)
-def fixit(message):
+def great_day(message, *groups):
     message.reply('https://www.youtube.com/watch?v=WRu_-9MBpd4')
 
 SPENDSTRING = r'''can\s
@@ -195,8 +195,9 @@ def enhance(message):
     message.send('/me types furiously. "Enhance."')
 
 #@slackbot.bot.listen_to('.*')
-#def explore(message):
-#    udi = message._get_user_id()
-#    name = message._client.users[udi]['name']
-#    print 'Found message %s from %s' % (message.body['text'], name)
-#    #message.send('@%s: found your name!' % name)
+#def explore(message, *groups):
+    #print 'Groups: [[%s]]' % ', '.join(groups)
+    #udi = message._get_user_id()
+    #name = message._client.users[udi]['name']
+    #print 'Found message %s from %s' % (message.body['text'], name)
+    #message.send('@%s: found your name!' % name)
