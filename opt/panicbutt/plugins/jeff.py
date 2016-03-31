@@ -7,7 +7,7 @@
 #
 #  Creation Date : 01-05-2015
 #
-#  Last Modified : Fri 25 Mar 2016 12:29:39 PM CDT
+#  Last Modified : Tue 29 Mar 2016 05:29:12 PM CDT
 #
 #  Created By : Brian Auron
 #
@@ -23,7 +23,8 @@ from playhouse.postgres_ext import PostgresqlExtDatabase
 
 import slackbot.bot
 
-yaml_loc = 'config.yml'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+yaml_loc = os.path.join(BASE_DIR, '../config.yml')
 with open(yaml_loc, 'r') as fptr:
     cfg = yaml.load(fptr.read())
 dbuser = cfg['dbuser']

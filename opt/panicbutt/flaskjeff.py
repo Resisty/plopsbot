@@ -52,5 +52,13 @@ def jeff_level():
     info['level'] = info['name'].upper()
     return jsonify(info)
 
+@app.route('/idunnolol', methods=['GET'])
+def idunnolol():
+    data = {'response_type': 'in_channel',
+            'text': 'i dunno lol  \xc2\xaf\\(\xc2\xb0_o)/\xc2\xaf',
+           }
+    return jsonify(data)
+
+
 if __name__ == '__main__':
     app.run(host='brianauron.info', port=8080, debug = True)

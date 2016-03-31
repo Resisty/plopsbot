@@ -7,7 +7,7 @@
 #
 #  Creation Date : 03-05-2015
 #
-#  Last Modified : Fri 25 Mar 2016 05:29:36 PM CDT
+#  Last Modified : Wed 30 Mar 2016 08:39:44 PM CDT
 #
 #  Created By : Brian Auron
 #
@@ -19,9 +19,13 @@ import datetime
 import slackbot.bot
 import peewee
 import re
+import os
+import numbers
 from playhouse.postgres_ext import PostgresqlExtDatabase
 
-with open('config.yml', 'r') as fptr:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG = os.path.join(BASE_DIR, '../config.yml')
+with open(CONFIG, 'r') as fptr:
     cfg = yaml.load(fptr.read())
 dbuser = cfg['dbuser']
 dbpass = cfg['dbpass']
@@ -110,7 +114,7 @@ def show_snorts(message):
         results.append('Nobody has snorted a snort today!')
     message.reply('\n'.join(results))
 
-COUNTINGSTRING = r'''(\w+)
+COUNTINGSTRING = r'''([\w\.-]+)
                      (\+\+|--)$'''
 COUNTING = re.compile(COUNTINGSTRING, re.IGNORECASE|re.VERBOSE)
 @slackbot.bot.listen_to(COUNTING)
@@ -118,6 +122,13 @@ def count_update(message, *groups):
     key, delta = groups
     key = key.lower()
     delta = {'++': 1, '--': -1}[delta]
+    try:
+        s = numbers.NumberString.from_str(key)
+        s += delta
+        message.reply(s.str)
+        return
+    except numbers.NoNumberError:
+        pass
     with psql_db.atomic():
         try:
             count = Counts.create(key = key, count = 0)
