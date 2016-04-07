@@ -7,7 +7,7 @@
 #
 #  Creation Date : 30-03-2016
 #
-#  Last Modified : Wed 30 Mar 2016 08:36:52 PM CDT
+#  Last Modified : Thu 07 Apr 2016 03:35:02 PM CDT
 #
 #  Created By : Brian Auron
 #
@@ -40,6 +40,17 @@ class IntString(object):
         self.num += x
         return self
 
+    def __isub__(self, x):
+        self.num -= x
+        return self
+
+
+    def __repr__(self):
+        return self._tostr(self.num)
+
+    def __str__(self):
+        return self._tostr(self.num)
+
     @property
     def num(self):
         if not self._num:
@@ -58,12 +69,20 @@ class IntString(object):
 class BinString(IntString):
     def __init__(self, s):
         super(BinString, self).__init__(s)
+        try:
+            assert s.startswith('0b')
+        except AssertionError:
+            raise ValueError()
         self._base = 2
         self._tostr = bin
 
 class HexString(IntString):
     def __init__(self, s):
         super(HexString, self).__init__(s)
+        try:
+            assert s.startswith('0x')
+        except AssertionError:
+            raise ValueError()
         self._base = 16
         self._tostr = hex
 
