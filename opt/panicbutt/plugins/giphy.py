@@ -1,5 +1,6 @@
 import math
 import random
+import re
 
 import requests
 import slackbot.bot
@@ -7,9 +8,10 @@ import slackbot.bot
 GIPHY_API_KEY = 'dc6zaTOxFJmzC'
 GIPHY_SEARCH_URL = 'http://api.giphy.com/v1/gifs/search'
 
-@slackbot.bot.respond_to(re.compile('^giphy (.*)$', re.I))
+@slackbot.bot.listen_to(re.compile('^giphy (.*)$', re.I))
 def giphy(message, query):
-    response = requests.get(GIPHY_SEARCH_URL, q=query, api_key=GIPHY_API_KEY)
+    params = {'q': query, 'api_key': GIPHY_API_KEY}
+    response = requests.get(GIPHY_SEARCH_URL, params=params)
     if not response.ok:
         message.reply('herp derp problems connecting to giphy API')
         return
