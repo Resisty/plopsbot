@@ -96,7 +96,7 @@ def spin_wheel(message):
     message.reply(str(random.choice(values)))
 
 PINGSTRING = r'''^([^\w\s]*|_*)
-                  ([a-zA-Z]+)
+                  ([a-zA-Z-_]+)
                   ING(S?)
                   ([^\w\s]*|_*)
                   (\sME(\s.*)?)?$'''
@@ -160,6 +160,7 @@ MANATEE = re.compile(MANATEESTRING)
 def manatee_maybe(message):
     msg = message.body['text']
     nicks = [j['name'] for i,j in message._client.users.items()]
+    nickids = [j['id'] for i,j in message._client.users.items()]
     if msg == msg.upper() and len(msg) > 4 and msg.lower() not in nicks:
         manatee = random.randint(1, 34)
         if manatee == 34:
@@ -171,28 +172,28 @@ def manatee_maybe(message):
     message.reply(reply)
 
 PORTLANDSTRING = r'''tell\s(.+)\sto\scome\sto\sPortland'''
-PORTLAND = re.compile(PORTLANDSTRING)
+PORTLAND = re.compile(PORTLANDSTRING, re.I)
 @slackbot.bot.respond_to(PORTLAND)
 def come_to_portland(message, *groups):
     who = groups[0]
     message.send('@'+who+': http://i.imgur.com/29hMr0h.jpg')
 
 SEATTLESTRING = r'''tell\s(.+)\sto\scome\sto\sSeattle'''
-SEATTLE = re.compile(SEATTLESTRING)
+SEATTLE = re.compile(SEATTLESTRING, re.I)
 @slackbot.bot.respond_to(SEATTLE)
 def come_to_seattle(message, *groups):
     who = groups[0]
     message.send('@'+who+': http://i.imgur.com/Lwo0CTF.gif')
 
 CLEVELANDSTRING = r'''tell\s(.+)\sto\scome\sto\sCleveland'''
-CLEVELAND = re.compile(CLEVELANDSTRING)
+CLEVELAND = re.compile(CLEVELANDSTRING, re.I)
 @slackbot.bot.respond_to(CLEVELAND)
 def come_to_cleveland(message, *groups):
     who = groups[0]
     message.send('@'+who+': https://www.youtube.com/watch?v=ysmLA5TqbIY')
 
 ENHANCESTRING = r'''enhance'''
-ENHANCE = re.compile(ENHANCESTRING)
+ENHANCE = re.compile(ENHANCESTRING, re.I)
 @slackbot.bot.listen_to(ENHANCE)
 def enhance(message):
     message.send('/me types furiously. "Enhance."')
