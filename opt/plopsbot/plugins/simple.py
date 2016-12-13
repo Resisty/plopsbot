@@ -48,16 +48,10 @@ PYTHONTOWEL = re.compile(PYTHONTOWELSTRING, re.IGNORECASE)
 def towel(message):
     message.reply('''What did you say?!''')
 
-MARTINSTRING = '''martin'''
-MARTIN = re.compile(MARTINSTRING, re.IGNORECASE)
-@slackbot.bot.listen_to(MARTIN)
-def martin(message):
-    message.reply('''s/Martin/1950's newscast guy/g''')
-
 GROUPSTRING = r'''^roll\sdice
                   $|\s
                   ((\s*[\d]+d[\d]+)+)
-                  ($|\swith\s.*\smodifier(|s)\s((\s*[\+-]\d+)+))'''
+                  (\swith\s.*\smodifier(|s)\s((\s*[\+-]\d+)+))?'''
 GROUPS = re.compile(GROUPSTRING, re.IGNORECASE | re.VERBOSE)
 @slackbot.bot.respond_to(GROUPS)
 def roll_dice(message, *groups):
@@ -95,64 +89,11 @@ def spin_wheel(message):
     values = range(5, 105, 5)
     message.reply(str(random.choice(values)))
 
-PINGSTRING = r'''^([^\w\s]*|_*)
-                  ([a-zA-Z-_]+)
-                  ING(S?)
-                  ([^\w\s]*|_*)
-                  (\sME(\s.*)?)?$'''
-PING = re.compile(PINGSTRING, re.IGNORECASE | re.VERBOSE)
-@slackbot.bot.listen_to(PING)
-def ping(message, *groups):
-    letter = groups[1]
-    pre, suf = groups[0], groups[3]
-    msg = 'ong' if letter[-1].islower() else 'ONG'
-    msg += 's' if groups[2] and groups[2].islower() else 'S' if groups[2] else ''
-    msg = pre+letter+msg+suf
-    message.reply(msg)
-
-WHELPSTRING = '''whelps'''
-WHELPS = re.compile(WHELPSTRING, re.IGNORECASE)
-@slackbot.bot.listen_to(WHELPS)
-def whelps(message):
-    for i in ['WHELPS','LEFT SIDE','EVEN SIDE',
-              'MANY WHELPS','NOW','HANDLE IT!']:
-        message.reply(i)
-
-FIXITSTRING = '''fixit'''
-FIXIT = re.compile(FIXITSTRING, re.IGNORECASE)
-@slackbot.bot.listen_to(FIXIT)
-def fixit(message):
-    message.reply('https://www.youtube.com/watch?v=8ZCysBT5Kec')
-
 FINESTRING = '''this\sis\sfine'''
 FINE = re.compile(FINESTRING, re.IGNORECASE)
 @slackbot.bot.listen_to(FINE)
 def this_is_fine(message):
     message.reply('http://gunshowcomic.com/648')
-
-GREATDAYSTRING = r'''(it's\sgonna\sbe\sa\s)*
-                    great\sday'''
-GREATDAY = re.compile(GREATDAYSTRING, re.IGNORECASE|re.VERBOSE)
-@slackbot.bot.listen_to(GREATDAY)
-def great_day(message, *groups):
-    message.reply('https://www.youtube.com/watch?v=WRu_-9MBpd4')
-
-SPENDSTRING = r'''can\s
-                     (.*)\s
-                     spend\s
-                     (this|that|the)\s
-                     money'''
-SPEND = re.compile(SPENDSTRING, re.IGNORECASE|re.VERBOSE)
-@slackbot.bot.listen_to(SPEND)
-def can_spend(message, *groups):
-    message.reply('http://brianauron.info/CanBobiSpendThisMoney')
-
-HADDAWAYSTRING = r'''(|,)\s
-                     what\sis\slove\?*$'''
-HADDAWAY = re.compile(HADDAWAYSTRING, re.IGNORECASE|re.VERBOSE)
-@slackbot.bot.listen_to(HADDAWAY)
-def what_is_love(message):
-    message.reply('Baby don\'t hurt me!  https://www.youtube.com/watch?v=JRVfysTXhNA')
 
 MANATEESTRING = '''[A-Z]{3}'''
 MANATEE = re.compile(MANATEESTRING)
@@ -170,20 +111,6 @@ def manatee_maybe(message):
     else:
         return
     message.reply(reply)
-
-PORTLANDSTRING = r'''tell\s(.+)\sto\scome\sto\sPortland'''
-PORTLAND = re.compile(PORTLANDSTRING, re.I)
-@slackbot.bot.respond_to(PORTLAND)
-def come_to_portland(message, *groups):
-    who = groups[0]
-    message.send('@'+who+': http://i.imgur.com/29hMr0h.jpg')
-
-SEATTLESTRING = r'''tell\s(.+)\sto\scome\sto\sSeattle'''
-SEATTLE = re.compile(SEATTLESTRING, re.I)
-@slackbot.bot.respond_to(SEATTLE)
-def come_to_seattle(message, *groups):
-    who = groups[0]
-    message.send('@'+who+': http://i.imgur.com/Lwo0CTF.gif')
 
 CLEVELANDSTRING = r'''tell\s(.+)\sto\scome\sto\sCleveland'''
 CLEVELAND = re.compile(CLEVELANDSTRING, re.I)
