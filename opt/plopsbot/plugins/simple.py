@@ -28,24 +28,34 @@ SHENANISTRING = '''what's the name of that place you like with all the goofy\
 SHENANIGANS = [SHENANISTRING, re.IGNORECASE]
 @slackbot.bot.respond_to(*SHENANIGANS)
 def shenanigans(message):
+    '''@mention with r'what's the name of that \
+place you like with all the goofy shit on the walls?'
+Example: @bot what's the name of that place you like with all the goofy shit \
+on the walls?'''
     message.reply('You mean Shenanigans? You guys talkin\' \'bout\
  shenanigans?')
 
 HI = re.compile(r'hi(|!)$', re.IGNORECASE)
 @slackbot.bot.respond_to(HI)
 def hi(message, groups):
+    '''@mention with r'hi(|!)$'
+Example: @bot hi!'''
     message.reply('Yo!')
 
 TOWELSTRING = '''you're a towel'''
 TOWEL = re.compile(TOWELSTRING, re.IGNORECASE)
 @slackbot.bot.listen_to(TOWEL)
 def towel(message):
+    '''Use the string r'you\'re a towel'
+Example: hey, you're a towel, guy!'''
     message.reply('''YOU'RE a towel!''')
 
 PYTHONTOWELSTRING = '''you're a (bot|python|robot) towel'''
 PYTHONTOWEL = re.compile(PYTHONTOWELSTRING, re.IGNORECASE)
 @slackbot.bot.listen_to(PYTHONTOWEL)
 def towel(message):
+    '''Use the string r'you\'re a (bot|python|robot) towel'
+Example: hey, you're a bot towel, buddy!'''
     message.reply('''What did you say?!''')
 
 GROUPSTRING = r'''^roll\sdice
@@ -55,6 +65,11 @@ GROUPSTRING = r'''^roll\sdice
 GROUPS = re.compile(GROUPSTRING, re.IGNORECASE | re.VERBOSE)
 @slackbot.bot.respond_to(GROUPS)
 def roll_dice(message, *groups):
+    '''@mention with r'^roll\sdice
+               $|\s
+               ((\s*[\d]+d[\d]+)+)
+               ($|\swith\s.*\smodifier(|s)\s((\s*[\+-]\d+)+))'
+Example: roll dice 1d4 2d6 with butts modifier +1'''
     try:
         dice = groups[0]
         try:
@@ -86,6 +101,8 @@ SPINSTRING = r'''spin\sthe\swheel'''
 SPIN = re.compile(SPINSTRING, re.IGNORECASE | re.VERBOSE)
 @slackbot.bot.respond_to(SPIN)
 def spin_wheel(message):
+    '''@mention with r'spin\sthe\swheel.
+Example: @bot spin the wheel'''
     values = range(5, 105, 5)
     message.reply(str(random.choice(values)))
 
@@ -93,12 +110,15 @@ FINESTRING = '''this\sis\sfine'''
 FINE = re.compile(FINESTRING, re.IGNORECASE)
 @slackbot.bot.listen_to(FINE)
 def this_is_fine(message):
+    '''Use a string with 'this is fine' in it.
+Example: I fucked up. This is fine.'''
     message.reply('http://gunshowcomic.com/648')
 
 MANATEESTRING = '''[A-Z]{3}'''
 MANATEE = re.compile(MANATEESTRING)
 @slackbot.bot.listen_to(MANATEE)
 def manatee_maybe(message):
+    '''Voice your anger.'''
     msg = message.body['text']
     nicks = [j['name'] for i,j in message._client.users.items()]
     nickids = [j['id'] for i,j in message._client.users.items()]
@@ -116,6 +136,8 @@ CLEVELANDSTRING = r'''tell\s(.+)\sto\scome\sto\sCleveland'''
 CLEVELAND = re.compile(CLEVELANDSTRING, re.I)
 @slackbot.bot.respond_to(CLEVELAND)
 def come_to_cleveland(message, *groups):
+    '''@mention to tell the bot to tell somebody to come to Cleveland
+Example: @bot tell @user1234 to come to Cleveland'''
     who = groups[0]
     message.send('@'+who+': https://www.youtube.com/watch?v=ysmLA5TqbIY')
 
@@ -123,10 +145,12 @@ ENHANCESTRING = r'''enhance'''
 ENHANCE = re.compile(ENHANCESTRING, re.I)
 @slackbot.bot.listen_to(ENHANCE)
 def enhance(message):
+    '''Enhance!'''
     message.send('/me types furiously. "Enhance."')
 
 @slackbot.bot.respond_to(re.compile('h[ae]lp', re.I))
 def explore(message, *groups):
+    '''@mention the bot with 'help' for this message.'''
     udi = message._get_user_id()
     name = message._client.users[udi]['name']
     (message

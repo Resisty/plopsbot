@@ -7,7 +7,7 @@
 #
 #  Creation Date : 22-03-2016
 #
-#  Last Modified : Tue 29 Mar 2016 05:22:42 PM CDT
+#  Last Modified : Fri 21 Jul 2017 04:52:28 PM CDT
 #
 #  Created By : Brian Auron
 #
@@ -24,6 +24,10 @@ URBANSTRING = r'''urban\s([\w\s-]+)($|\s#\d+)'''
 URBAN = re.compile(URBANSTRING, re.IGNORECASE)
 @slackbot.bot.respond_to(URBAN)
 def urban(message, *groups):
+    '''@mention with a request for an Urban Dictionary entry. Optionally \
+request a numbered reference.
+Examples: @bot urban dickbutt
+          @bot urban butts #3'''
     try:
         what = groups[0]
         what = what.replace(' ', '%20')
